@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedInDM</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --border: #e0e0e0;
+            --primary: #0a66c2;
+            --primary-hover: #004182;
+            --accent: #70b5f9;
+            --success: #2e7d32;
+            --danger: #d32f2f;
+        }
+        .dark {
+            --bg: #1a1a1a;
+            --card: #2d2d2d;
+            --text: #e5e5e5;
+            --text-muted: #999;
+            --border: #404040;
+            --primary: #70b5f9;
+            --primary-hover: #a8d1ff;
+            --accent: #0a66c2;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .theme-toggle {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 14px;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 700px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .preview-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 150px;
+            font-size: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            flex: 1;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        .btn-secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .template-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .template-actions button {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        .template-manager {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        .template-manager.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔗 LinkedInDM</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        </header>
+        
+        <div class="main-grid">
+            <div class="card">
+                <h2>Details</h2>
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" placeholder="Enter first name" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" id="company" placeholder="Enter company" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Template</label>
+                    <select id="templateSelect" onchange="updatePreview()">
+                        <optgroup label="Warm Leads">
+                            <option value="warm-followup">Warm Lead Follow-up</option>
+                            <option value="meeting-request">Meeting Request</option>
+                        </optgroup>
+                        <optgroup label="Cold Outreach">
+                            <option value="cold-outreach">Cold Outreach</option>
+                            <option value="referral-intro">Referral Intro</option>
+                        </optgroup>
+                        <optgroup label="Thank You">
+                            <option value="thank-connect">Thank You for Connecting</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="template-actions">
+                    <button class="btn-secondary" onclick="showTemplateManager()">➕ Add Template</button>
+                    <button class="btn-secondary" onclick="editTemplate()">✏️ Edit</button>
+                    <button class="btn-secondary" onclick="deleteTemplate()">🗑️ Delete</button>
+                    <button class="btn-secondary" onclick="exportTemplates()">📤 Export</button>
+                    <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import</button>
+                    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importTemplates(this)">
+                    <button class="btn-secondary" onclick="clearForm()">Clear</button>
+                </div>
+                
+                <div class="template-manager" id="templateManager">
+                    <h3 style="margin-bottom:12px;font-size:14px;">Add New Template</h3>
+                    <div class="form-group">
+                        <label>Template Name</label>
+                        <input type="text" id="newTemplateName" placeholder="e.g., Custom Reply">
+                    </div>
+                    <div class="form-group">
+                        <label>Message (use $Name$ and $Company$)</label>
+                        <textarea id="newTemplateContent" rows="4" placeholder="Hi $Name$! Great work at $Company$..."></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="addTemplate()">Add Template</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Preview</h2>
+                <div class="preview-box" id="preview"></div>
+                <div class="char-count" id="charCount">0 characters</div>
+                <div class="btn-row">
+                    <button class="btn-primary" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">✅ Copied!</div>
+
+    <script>
+        let templates = {};
+
+        function loadTemplates() {
+            const saved = localStorage.getItem('linkedindm_templates');
+            if (saved) {
+                templates = JSON.parse(saved);
+            }
+            updateTemplateSelect();
+        }
+
+        function saveTemplates() {
+            localStorage.setItem('linkedindm_templates', JSON.stringify(templates));
+        }
+
+        function updateTemplateSelect() {
+            const select = document.getElementById('templateSelect');
+            select.innerHTML = '';
+            
+            const keys = Object.keys(templates);
+            
+            if (keys.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No templates yet — add one!';
+                select.appendChild(option);
+                return;
+            }
+            
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = 'Templates';
+            
+            keys.forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = formatTemplateName(key);
+                optgroup.appendChild(option);
+            });
+            
+            select.appendChild(optgroup);
+        }
+
+        function formatTemplateName(key) {
+            return key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function updatePreview() {
+            const name = document.getElementById('firstName').value || '$Name$';
+            const company = document.getElementById('company').value || '$Company$';
+            const templateKey = document.getElementById('templateSelect').value;
+            
+            let text = templates[templateKey] || '';
+            text = text.replace(/\$Name\$/g, name).replace(/\$Company\$/g, company);
+            
+            document.getElementById('preview').textContent = text;
+            document.getElementById('charCount').textContent = text.length + ' characters';
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('preview').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = document.body.classList.contains('dark') ? '☀️ Light' : '🌙 Dark';
+            localStorage.setItem('linkedindm_theme', document.body.classList.contains('dark'));
+        }
+
+        function clearForm() {
+            document.getElementById('firstName').value = '';
+            document.getElementById('company').value = '';
+            updatePreview();
+        }
+
+        function showTemplateManager() {
+            document.getElementById('templateManager').classList.toggle('show');
+        }
+
+        function addTemplate() {
+            const name = document.getElementById('newTemplateName').value.trim();
+            const content = document.getElementById('newTemplateContent').value.trim();
+            
+            if (!name || !content) {
+                alert('Please enter both a name and message');
+                return;
+            }
+            
+            const key = name.toLowerCase().replace(/\s+/g, '-');
+            templates[key] = content;
+            saveTemplates();
+            updateTemplateSelect();
+            
+            document.getElementById('newTemplateName').value = '';
+            document.getElementById('newTemplateContent').value = '';
+            document.getElementById('templateSelect').value = key;
+            updatePreview();
+            
+            showToast();
+            document.getElementById('toast').textContent = '✅ Template Added!';
+        }
+
+        function editTemplate() {
+            const key = document.getElementById('templateSelect').value;
+            if (!templates[key]) {
+                alert('Select a template first');
+                return;
+            }
+            
+            const newContent = prompt('Edit template:', templates[key]);
+            if (newContent !== null) {
+                templates[key] = newContent;
+                saveTemplates();
+                updatePreview();
+                showToast();
+                document.getElementById('toast').textContent = '✅ Template Updated!';
+            }
+        }
+
+        function deleteTemplate() {
+            const key = document.getElementById('templateSelect').value;
+            if (!templates[key]) {
+                alert('Select a template first');
+                return;
+            }
+            
+            if (confirm('Delete this template?')) {
+                delete templates[key];
+                saveTemplates();
+                updateTemplateSelect();
+                updatePreview();
+                showToast();
+                document.getElementById('toast').textContent = '✅ Template Deleted';
+            }
+        }
+
+        function exportTemplates() {
+            const keys = Object.keys(templates);
+            if (keys.length === 0) {
+                alert('No templates to export');
+                return;
+            }
+            const blob = new Blob([JSON.stringify(templates, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'linkedindm-templates.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast();
+            document.getElementById('toast').textContent = '✅ Templates Exported!';
+        }
+
+        function importTemplates(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    for (let key in imported) {
+                        templates[key] = imported[key];
+                    }
+                    saveTemplates();
+                    updateTemplateSelect();
+                    showToast();
+                    document.getElementById('toast').textContent = '✅ Templates Imported!';
+                } catch(err) {
+                    alert('Invalid template file');
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        // Initialize
+        loadTemplates();
+        
+        // Apply saved theme
+        if (localStorage.getItem('linkedindm_theme') === 'true') {
+            document.body.classList.add('dark');
+            document.querySelector('.theme-toggle').textContent = '☀️ Light';
+        }
+
+        updatePreview();
+    </script>
+</body>
+</html>
