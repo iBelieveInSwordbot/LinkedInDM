@@ -470,10 +470,15 @@
                         'Accept': 'application/vnd.github+json'
                     }
                 });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
+                if (!res.ok) {
+                    if (res.status === 401) throw new Error('401 — token is invalid or expired (rotate it?)');
+                    if (res.status === 404) throw new Error('404 — Gist ID wrong or token lacks gist scope');
+                    if (res.status === 403) throw new Error('403 — token has wrong scope (needs gist)');
+                    throw new Error('HTTP ' + res.status);
+                }
                 const gist = await res.json();
                 const file = gist.files['templates.json'] || Object.values(gist.files)[0];
-                if (!file) throw new Error('No templates.json in Gist');
+                if (!file) throw new Error('Gist has no files');
                 let content = file.content;
                 if (file.truncated && file.raw_url) {
                     const raw = await fetch(file.raw_url, { headers: { 'Authorization': 'Bearer ' + token }});
@@ -519,7 +524,12 @@
                     },
                     body: JSON.stringify(payload)
                 });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
+                if (!res.ok) {
+                    if (res.status === 401) throw new Error('401 — token is invalid or expired');
+                    if (res.status === 404) throw new Error('404 — Gist ID wrong or token lacks gist scope');
+                    if (res.status === 403) throw new Error('403 — token has wrong scope (needs gist)');
+                    throw new Error('HTTP ' + res.status);
+                }
                 lastSyncedAt = Date.now();
                 dirty = false;
                 refreshSyncLabel();
