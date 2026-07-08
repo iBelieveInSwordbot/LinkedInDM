@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedInDM</title>
+    <title>LinkedInDM v3</title>
     <style>
         :root {
             --bg: #f5f5f5;
@@ -495,7 +495,7 @@
                 if (fromUser) toast('✅ Pulled ' + Object.keys(templates).length + ' templates');
             } catch (e) {
                 console.error('pullFromGist failed', e);
-                setSync('err', 'Cloud fetch failed — using local cache');
+                setSync('err', 'Fetch failed: ' + e.message);
                 if (fromUser) toast('❌ Fetch failed: ' + e.message, true);
             }
         }
@@ -535,7 +535,7 @@
                 refreshSyncLabel();
             } catch (e) {
                 console.error('pushToGist failed', e);
-                setSync('err', 'Cloud save failed — kept locally');
+                setSync('err', 'Save failed: ' + e.message);
                 toast('❌ Cloud save failed: ' + e.message, true);
             }
         }
